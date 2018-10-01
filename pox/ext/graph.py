@@ -100,13 +100,13 @@ class NXTopology:
         for k in keys:
             plt.plot(x_axis, y_axes[k], label=k,)
         plt.legend()
-        plt.savefig("1.svg")
+        plt.savefig("Figura9.svg")
         
         plt.figure()
         pos = nx.spring_layout(self.G)
         nx.draw(self.G, pos=pos, with_labels=False, node_size=1, width=0.1)
         # nx.draw_networkx_edge_labels(G, pos=pos, labels=nx.get_edge_attributes(G, 'count'))
-        plt.savefig("2.svg")
+        plt.savefig("Topologia.svg")
         plt.show()
 
 

@@ -1,5 +1,16 @@
 #!/bin/bash
 
+echo "Gerando Figura 9 e Topologia Jellyfish"
+sleep 5
+
+sudo python graph.py
+
+
+echo "Operações realizadas com sucesso! "
+sleep 5
+echo ""
+
+
 echo "Iniciando as Simulações - Jellyfish com TCP"
 echo ""
 sudo sh ./disablemptcp.sh
@@ -192,6 +203,82 @@ do
         rm -rf *.err *.out
 done
 
+#####################################################
+#INICIO DAS SIMULACOES COM O FAT-TREE
+#####################################################
+sudo mn -c 1> /dev/null 2> /dev/stdout
+sleep 5
+sudo killall python 1> /dev/null 2> /dev/stdout
+sleep 5
+
+cd ../../lib
+echo " "
+echo "======================================================================="
+echo "Gerando Fat-Tree TCP ECMP 1 FLUXO "
+
+sudo python pox.py DCController --topo=ft,4 --routing=ECMP & 1> /dev/null 2>&1 &
+sleep 10
+
+sudo python fattreetcpecmp1f.py -i iperffattree -d res/fattreetcpecmp1f/ -p  0.03 -t 10 --ecmp --iperf 1> /dev/null 2>&1
+
+sudo mn -c 1> /dev/null 2> /dev/stdout
+sleep 5
+sudo killall python 1> /dev/null 2> /dev/stdout
+sleep 5
+
+echo " "
+echo "======================================================================="
+echo "Gerando Fat-Tree TCP ECMP 8 FLUXOS "
+
+sudo python pox.py DCController --topo=ft,4 --routing=ECMP & 1> /dev/null 2>&1 &
+sleep 10
+
+sudo python fattreetcpecmp8f.py -i iperffattree -d res/fattreetcpecmp8f/ -p  0.03 -t 10 --ecmp --iperf 1> /dev/null 2>&1
+
+sudo mn -c 1> /dev/null 2> /dev/stdout
+sleep 5
+sudo killall python 1> /dev/null 2> /dev/stdout
+sleep 5
+
+echo " "
+echo "======================================================================="
+echo "Gerando Fat-Tree MPTCP ECMP 8 SUBFLUXOS "
+
+sudo python pox.py DCController --topo=ft,4 --routing=ECMP & 1> /dev/null 2>&1 &
+sleep 10
+
+sudo python fattreemptcpecmp8f.py -i iperffattree -d res/fattreemptcpecmp8f/ -p  0.03 -t 10 --ecmp --iperf 1> /dev/null 2>&1
+echo "========================================================================"
+echo " "
+
+#############################################################
+#FIM DAS SIMULAÇOES FAT-TREE E INICIO DO CALCULO DAS MEDIAS
+#############################################################
+
+#MEDIAS FAT-TREE
+cd res/fattreetcpecmp1f/
+cat *.out | grep sender | awk -F' ' '{print $5}' > data
+soma=$(paste -sd+ data | bc)
+div=$(cat data | wc -l)
+totalftecmp1f=`echo "scale=2 ; $soma / $div" | bc`
+echo "Fat-tree ecmp8 tcp 1flow average : $totalftecmp1f" > average.txt
+
+cd res/fattreetcpecmp8f/
+cat *.out | grep sender | grep SUM | awk -F' ' '{print $6}' > data
+soma=$(paste -sd+ data | bc)
+div=$(cat data | wc -l)
+totalftecmp8f=`echo "scale=2 ; $soma / $div" | bc`
+echo "ft ecmp8 tcp 8flow average : $totalftecmp8f" > average.txt
+
+
+cd res/fattreemptcpecmp8f/
+cat *.out | grep sender | grep SUM | awk -F' ' '{print $6}' > data
+soma=$(paste -sd+ data | bc)
+div=$(cat data | wc -l)
+totalmptcp=`echo "scale=2 ; $soma / $div" | bc`
+echo "Fat-Tree ecmp8 mptcp 8flow average : $totalmptcp" > average.txt
+
+#MEDIAS JELLYFISH
 MEDIAECMPMPTCP=`echo "scale=2; ($MEDIAECMPMPTCP / 1)" | bc -l`
 MEDIAKSMPTCP=`echo "scale=2; ($MEDIAKSMPTCP / 1)" | bc -l`
 MEDIAECMP1F=`echo "scale=2; ($MEDIAECMP1F / 1)" | bc -l`
@@ -203,9 +290,9 @@ echo "-------------------------------------------------------------"
 echo "|CONGESTION      | FAT-TREE (10 SVRS)|  JELLYFISH (10 SVRS)  |" 
 echo "|CONTROL         |        ECMP       |ECMP  |8-SHORTEST PATHS|"
 echo "|------------------------------------------------------------|"
-echo "|TCP 1 FLOW      |                   |$MEDIAECMP1F%|   $MEDIAKS1F%       |"
-echo "|TCP 8 FLOWS     |                   |$MEDIAECMP8F%|   $MEDIAKS8F%       |"
-echo "|MPTCP 8 SUBFLOWS|                   |$MEDIAECMPMPTCP%|   $MEDIAKSMPTCP%       |"
+echo "|TCP 1 FLOW      |         $totalftecmp1f%  |$MEDIAECMP1F%|   $MEDIAKS1F%       |"
+echo "|TCP 8 FLOWS     |         $totalftecmp8f%  |$MEDIAECMP8F%|   $MEDIAKS8F%       |"
+echo "|MPTCP 8 SUBFLOWS|         $totalmptcp%     |$MEDIAECMPMPTCP%|   $MEDIAKSMPTCP%       |"
 echo "-------------------------------------------------------------"
 
 echo "Execuções realizadas com Sucesso"
