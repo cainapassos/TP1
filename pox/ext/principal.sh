@@ -265,16 +265,12 @@ div=$(cat data | wc -l)
 totalftecmp1f=`echo "scale=2 ; $soma / $div" | bc`
 echo "Fat-tree ecmp8 tcp 1flow average : $totalftecmp1f" > average.txt
 
-pwd
-
 cd ../fattreetcpecmp8f/
 cat *.out | grep sender | grep SUM | awk -F' ' '{print $6}' > data
 soma=$(paste -sd+ data | bc)
 div=$(cat data | wc -l)
 totalftecmp8f=`echo "scale=2 ; $soma / $div" | bc`
 echo "ft ecmp8 tcp 8flow average : $totalftecmp8f" > average.txt
-
-pwd
 
 cd ../fattreemptcpecmp8f/
 cat *.out | grep sender | grep SUM | awk -F' ' '{print $6}' > data
