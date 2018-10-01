@@ -1,1 +1,1 @@
-Fat-Tree ecmp8 mptcp 8flow average : 
+Fat-tree ecmp8 tcp 1flow average : 84.53

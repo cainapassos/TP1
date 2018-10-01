@@ -206,6 +206,8 @@ done
 #####################################################
 #INICIO DAS SIMULACOES COM O FAT-TREE
 #####################################################
+
+
 sudo mn -c 1> /dev/null 2> /dev/stdout
 sleep 5
 sudo killall python 1> /dev/null 2> /dev/stdout
@@ -263,15 +265,18 @@ div=$(cat data | wc -l)
 totalftecmp1f=`echo "scale=2 ; $soma / $div" | bc`
 echo "Fat-tree ecmp8 tcp 1flow average : $totalftecmp1f" > average.txt
 
-cd res/fattreetcpecmp8f/
+pwd
+
+cd ../fattreetcpecmp8f/
 cat *.out | grep sender | grep SUM | awk -F' ' '{print $6}' > data
 soma=$(paste -sd+ data | bc)
 div=$(cat data | wc -l)
 totalftecmp8f=`echo "scale=2 ; $soma / $div" | bc`
 echo "ft ecmp8 tcp 8flow average : $totalftecmp8f" > average.txt
 
+pwd
 
-cd res/fattreemptcpecmp8f/
+cd ../fattreemptcpecmp8f/
 cat *.out | grep sender | grep SUM | awk -F' ' '{print $6}' > data
 soma=$(paste -sd+ data | bc)
 div=$(cat data | wc -l)
@@ -290,9 +295,9 @@ echo "-------------------------------------------------------------"
 echo "|CONGESTION      | FAT-TREE (10 SVRS)|  JELLYFISH (10 SVRS)  |" 
 echo "|CONTROL         |        ECMP       |ECMP  |8-SHORTEST PATHS|"
 echo "|------------------------------------------------------------|"
-echo "|TCP 1 FLOW      |         $totalftecmp1f%  |$MEDIAECMP1F%|   $MEDIAKS1F%       |"
-echo "|TCP 8 FLOWS     |         $totalftecmp8f%  |$MEDIAECMP8F%|   $MEDIAKS8F%       |"
-echo "|MPTCP 8 SUBFLOWS|         $totalmptcp%     |$MEDIAECMPMPTCP%|   $MEDIAKSMPTCP%       |"
+echo "|TCP 1 FLOW      |         $totalftecmp1f%    |$MEDIAECMP1F%|   $MEDIAKS1F%       |"
+echo "|TCP 8 FLOWS     |         $totalftecmp8f%    |$MEDIAECMP8F%|   $MEDIAKS8F%       |"
+echo "|MPTCP 8 SUBFLOWS|         $totalmptcp%    |$MEDIAECMPMPTCP%|   $MEDIAKSMPTCP%       |"
 echo "-------------------------------------------------------------"
 
 echo "Execuções realizadas com Sucesso"
